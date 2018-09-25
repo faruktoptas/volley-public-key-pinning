@@ -18,9 +18,7 @@ import com.android.volley.toolbox.Volley;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,13 +32,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         requestQueue = Volley.newRequestQueue(this, new HurlStack(null, pinnedSSLSocketFactory()));
     }
 
-    private void sendRequest(){
+    private void sendRequest() {
         StringRequest request = new StringRequest(Request.Method.GET, SECURE_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -57,15 +55,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private SSLSocketFactory pinnedSSLSocketFactory() {
-        TrustManager tm[] = {new PubKeyManager(PUBLIC_KEY)};
-        SSLContext context;
         try {
-            context = SSLContext.getInstance("TLS");
-            context.init(null, tm, null);
-            return context.getSocketFactory();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            return new TLSSocketFactory(PUBLIC_KEY);
         } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return null;
